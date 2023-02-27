@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const { execSync } = require('child_process');
-const { GitHub, context } = require('@actions/github');
+const { context } = require('@actions/github');
+const github = require('@actions/github');
 
 const updateOrCreateComment = async (githubClient, commentId, body) => {
   const repoName = context.repo.repo;
@@ -8,7 +9,7 @@ const updateOrCreateComment = async (githubClient, commentId, body) => {
   const prNumber = context.issue.number;
 
   if (commentId) {
-    return await githubClient.issues.updateComment({
+    return await githubClient.rest.issues.updateComment({
       issue_number: prNumber,
       comment_id  : commentId,
       repo        : repoName,
@@ -17,7 +18,7 @@ const updateOrCreateComment = async (githubClient, commentId, body) => {
     });
   }
 
-  return await githubClient.issues.createComment({
+  return await githubClient.rest.issues.createComment({
     repo        : repoName,
     owner       : repoOwner,
     body        : body,
@@ -31,11 +32,11 @@ const main = async () => {
   const githubToken = core.getInput('github-token');
   const testCommand = core.getInput('test-command') || 'npx jest';
   const prNumber = context.issue.number;
-  const githubClient = new GitHub(githubToken);
+  const githubClient = github.getOctokit(githubToken);
 
   const runningCommentBody = `## Code Coverage Summary`;
 
-  const issueResponse = await githubClient.issues.listComments({
+  const issueResponse = await githubClient.rest.issues.listComments({
     issue_number: prNumber,
     repo        : repoName,
     owner       : repoOwner
