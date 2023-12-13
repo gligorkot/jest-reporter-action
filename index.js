@@ -12,9 +12,13 @@ const main = async () => {
   const githubClient = github.getOctokit(githubToken);
 
   const codeCoverage = execSync(testCommand).toString();
+  let coveragePercentage = execSync(
+      "npx coverage-percentage ./coverage/lcov.info --lcov"
+  ).toString();
+  coveragePercentage = parseFloat(coveragePercentage).toFixed(2);
 
   const commentBody = `## Code Coverage Summary
-<p>Total Coverage: <code>${codeCoverage}</code></p>
+<p>Total Coverage: <code>${coveragePercentage}%</code></p>
 <details><summary>Coverage report</summary>
 <p>
 <pre>${codeCoverage}</pre>
