@@ -3,29 +3,6 @@ const { execSync } = require('child_process');
 const { context } = require('@actions/github');
 const github = require('@actions/github');
 
-const updateOrCreateComment = async (githubClient, commentId, body) => {
-  const repoName = context.repo.repo;
-  const repoOwner = context.repo.owner;
-  const prNumber = context.issue.number;
-
-  if (commentId) {
-    return await githubClient.rest.issues.updateComment({
-      issue_number: prNumber,
-      comment_id  : commentId,
-      repo        : repoName,
-      owner       : repoOwner,
-      body        : body,
-    });
-  }
-
-  return await githubClient.rest.issues.createComment({
-    repo        : repoName,
-    owner       : repoOwner,
-    body        : body,
-    issue_number: prNumber,
-  });
-};
-
 const main = async () => {
   const repoName = context.repo.repo;
   const repoOwner = context.repo.owner;
@@ -34,30 +11,22 @@ const main = async () => {
   const prNumber = context.issue.number;
   const githubClient = github.getOctokit(githubToken);
 
-  const runningCommentBody = `## Code Coverage Summary`;
-
-  const issueResponse = await githubClient.rest.issues.listComments({
-    issue_number: prNumber,
-    repo        : repoName,
-    owner       : repoOwner
-  });
-
-  const existingComment = issueResponse.data.find(function (comment) {
-    return comment.user.type === 'Bot' && comment.body.indexOf('<p>Total Coverage: <code>') === 0;
-  });
-
-  let commentId = existingComment && existingComment.id;
-
-  const response = await updateOrCreateComment(githubClient, commentId, runningCommentBody);
-
-  commentId = response && response.data && response.data.id;
-
   const codeCoverage = execSync(testCommand).toString();
-  const commentBody = `## Code Coverage Summary
-\`\`\`${codeCoverage}\`\`\`
-`;
 
-  await updateOrCreateComment(githubClient, commentId, commentBody);
+  const commentBody = `## Code Coverage Summary
+<p>Total Coverage: <code>${codeCoverage}</code></p>
+<details><summary>Coverage report</summary>
+<p>
+<pre>${codeCoverage}</pre>
+</p>
+</details>`;
+
+  await githubClient.rest.issues.createComment({
+    repo        : repoName,
+    owner       : repoOwner,
+    body        : commentBody,
+    issue_number: prNumber,
+  });
 };
 
 main().catch(err => core.setFailed(err.message));
