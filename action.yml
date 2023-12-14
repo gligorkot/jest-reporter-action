@@ -11,6 +11,9 @@ inputs:
   test-command:
     description: "Specify a command to run the tests"
     required: false
+  coverage-info-location:
+    description: "Specify the location of the coverage info, defaults to './coverage/lcov.info'"
+    required: false
 runs:
   using: "node20"
   main: "index.js"

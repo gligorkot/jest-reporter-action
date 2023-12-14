@@ -8,14 +8,14 @@ const main = async () => {
   const repoOwner = context.repo.owner;
   const githubToken = core.getInput('github-token');
   const testCommand = core.getInput('test-command') || 'npx jest';
+  const coverageInfoLocation = core.getInput('coverage-info-location') || './coverage/lcov.info';
   const prNumber = context.issue.number;
   const githubClient = github.getOctokit(githubToken);
 
   const codeCoverage = execSync(testCommand).toString();
-  let coveragePercentage = execSync(
-      "npx coverage-percentage ./coverage/lcov.info --lcov"
-  ).toString();
-  coveragePercentage = parseFloat(coveragePercentage).toFixed(2);
+  const coveragePercentage = parseFloat(execSync(
+      `npx coverage-percentage ${coverageInfoLocation} --lcov`
+  ).toString()).toFixed(2);
 
   const commentBody = `## Code Coverage Summary
 <p>Total Coverage: <code>${coveragePercentage}%</code></p>
