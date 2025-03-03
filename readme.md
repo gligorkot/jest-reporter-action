@@ -18,6 +18,10 @@ This action comments a pull request with the jest code coverage
 
 **Optional** The location of the coverage info file, useful for a monorepo, (defaults to './coverage/lcov.info' if not specified)
 
+### `with-coverage-table`
+
+**Optional** Whether to include a coverage table in the github comment or not (defaults to 'true')
+
 ## Example usage
 
 ```yml
@@ -26,4 +30,5 @@ with:
   github-token: ${{ secrets.GITHUB_TOKEN }}
   test-command: "yarn jest --coverage"
   coverage-info-location: ./coverage/lcov.info
+  with-coverage-table: true
 ```

@@ -8,6 +8,7 @@ const main = async () => {
   const repoOwner = context.repo.owner;
   const githubToken = core.getInput('github-token');
   const testCommand = core.getInput('test-command') || 'npx jest';
+  const withCoverageTable = core.getInput('with-coverage-table') || 'true';
   const coverageInfoLocation = core.getInput('coverage-info-location') || './coverage/lcov.info';
   const prNumber = context.issue.number;
   const githubClient = github.getOctokit(githubToken);
@@ -19,11 +20,11 @@ const main = async () => {
 
   const commentBody = `## Code Coverage Summary
 <p>Total Coverage: <code>${coveragePercentage}%</code></p>
-<details><summary>Coverage report</summary>
+${withCoverageTable === 'true' ? `<details><summary>Coverage report</summary>
 <p>
 <pre>${codeCoverage}</pre>
 </p>
-</details>`;
+</details>` : ''}`;
 
   await githubClient.rest.issues.createComment({
     repo        : repoName,
